@@ -2,7 +2,7 @@
 
 A local Python + Playwright toolkit for harvesting downloadable resources from web pages.
 
-：**网页资源采集器**。
+中文文档：[README.cn.md](./README.cn.md)
 
 Resource Harvester is designed for pages where downloads are hidden behind login, JavaScript-rendered links, buttons, export actions, or site-specific resource APIs. You log in manually once, the tool saves your browser session locally, and then it can reopen authenticated pages, inspect links/buttons, detect likely downloadable files, and save them into a local `downloads/` folder.
 

@@ -1,0 +1,6 @@
+auth.json
+downloads/
+.venv/
+__pycache__/
+*.pyc
+xiaoyuandownload-resource/

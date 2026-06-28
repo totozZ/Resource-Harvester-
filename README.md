@@ -4,11 +4,22 @@ A local Python + Playwright toolkit for harvesting downloadable resources from w
 
 中文文档：[README.cn.md](./README.cn.md)
 
+## Security Notice
+
+`auth.json` is a local-only session file. It may contain cookies, access tokens, or other browser storage data that can act like login credentials.
+
+- Never commit `auth.json`.
+- Never upload `auth.json` to a public repository.
+- Never share `auth.json` with other people.
+- If it is ever exposed, delete it, log out of the related website, rotate/revoke the session if possible, and rewrite Git history before pushing again.
+
+This repository ignores `auth.json` in `.gitignore`.
+
 Resource Harvester is designed for pages where downloads are hidden behind login, JavaScript-rendered links, buttons, export actions, or site-specific resource APIs. You log in manually once, the tool saves your browser session locally, and then it can reopen authenticated pages, inspect links/buttons, detect likely downloadable files, and save them into a local `downloads/` folder.
 
 It also includes a built-in adapter for China’s SmartEdu platform as an example of how site-specific download logic can be added on top of the generic crawler/downloader.
 
-Important: this project does not store usernames or passwords. It saves browser session state in `auth.json`, which may contain sensitive cookies or tokens. Never upload or share `auth.json`.
+This project does not store usernames or passwords. Login is completed manually in your browser.
 
 ## What It Can Do
 

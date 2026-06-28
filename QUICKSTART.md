@@ -2,6 +2,12 @@
 
 This is the fastest path for using **Resource Harvester** as a local web resource downloader.
 
+## Security First
+
+`auth.json` is a local session file and may contain sensitive cookies or tokens.
+
+Do not commit it. Do not upload it. Do not share it.
+
 ## 1. Install
 
 ```powershell
@@ -35,7 +41,7 @@ This creates:
 auth.json
 ```
 
-Do not upload or share `auth.json`.
+Keep this file local only. It is already ignored by `.gitignore`.
 
 ## 3. Inspect The Target Page
 

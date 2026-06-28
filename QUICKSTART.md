@@ -11,7 +11,8 @@ Do not commit it. Do not upload it. Do not share it.
 ## 1. Install
 
 ```powershell
-cd C:\Users\95833\Desktop\1
+git clone https://github.com/totozZ/Resource-Harvester-.git
+cd Resource-Harvester-
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt

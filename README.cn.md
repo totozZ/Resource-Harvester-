@@ -52,10 +52,11 @@
 
 ## 安装
 
-进入项目目录：
+克隆仓库并进入项目目录：
 
 ```powershell
-cd C:\Users\95833\Desktop\1
+git clone https://github.com/totozZ/Resource-Harvester-.git
+cd Resource-Harvester-
 ```
 
 创建并启用虚拟环境：

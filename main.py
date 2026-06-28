@@ -2,7 +2,7 @@ import argparse
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="SmartEdu Resource Harvester")
+    parser = argparse.ArgumentParser(description="Resource Harvester")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     subparsers.add_parser("login", help="手动登录并保存 auth.json")

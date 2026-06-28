@@ -1,127 +1,161 @@
-# SmartEdu Resource Harvester
+# Resource Harvester
 
-中文名：智慧教育资源采集器。
+A local Python + Playwright toolkit for harvesting downloadable resources from web pages.
 
-这是一个 Windows + Python + Playwright 的本地网页下载自动化项目。它最初用于登录后网页资源下载，现在已经内置国家中小学智慧教育平台专项下载能力，可以按教材目录批量下载：
+中文名可以叫：**网页资源采集器**。
 
-- 课件
-- 教学设计
-- 学习任务单
-- 课后练习
+Resource Harvester is designed for pages where downloads are hidden behind login, JavaScript-rendered links, buttons, export actions, or site-specific resource APIs. You log in manually once, the tool saves your browser session locally, and then it can reopen authenticated pages, inspect links/buttons, detect likely downloadable files, and save them into a local `downloads/` folder.
 
-项目不会保存账号密码。登录由你在浏览器中手动完成，工具只保存 Playwright 的 `auth.json` 登录态。
+It also includes a built-in adapter for China’s SmartEdu platform as an example of how site-specific download logic can be added on top of the generic crawler/downloader.
 
-重要提醒：`auth.json` 可能包含敏感 cookie 和 token，等同于部分网站的登录凭据。不要上传 GitHub，不要发给别人。
+Important: this project does not store usernames or passwords. It saves browser session state in `auth.json`, which may contain sensitive cookies or tokens. Never upload or share `auth.json`.
 
-## 功能
+## What It Can Do
 
-- 手动登录一次并保存登录态到 `auth.json`
-- 复用登录态访问需要登录的网站
-- 扫描普通网页中的链接和按钮
-- 下载普通 `a` 标签文件链接
-- 尝试点击按钮触发下载
-- 针对国家中小学智慧教育平台，按“小源教材下载助手”的公开逻辑下载课程资源
-- 支持单课下载和整册下载
-- 整册下载会按教材章节逐层创建文件夹
-- 下载文件保存到 `downloads/`
+- Reuse your manually logged-in browser session
+- Open authenticated pages with Chromium
+- Scan all page links and button-like elements
+- Detect likely download links by text, URL keywords, and file extensions
+- Download normal `a` tag resources with authenticated cookies
+- Try clicking download/export buttons and capture browser download events
+- Preserve readable Chinese filenames when possible
+- Save files into `downloads/`
+- Provide a clean Python structure for adding more site adapters
+- Include a SmartEdu adapter for course and full-book teaching resources
 
-## 安装
+## Good Use Cases
 
-进入项目目录：
+- Logged-in education platforms
+- Internal document portals
+- Attachment pages
+- Report/export pages
+- Courseware download pages
+- Pages where files are loaded through JavaScript
+- Sites where you want to inspect links before downloading
+
+## Limits
+
+Resource Harvester uses your own logged-in session. It does not bypass paywalls, captchas, DRM, account permissions, or website access controls. If your browser account cannot access a file, the tool usually cannot access it either.
+
+## Install
 
 ```powershell
 cd C:\Users\95833\Desktop\1
-```
-
-创建并启用虚拟环境：
-
-```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
-```
-
-安装依赖：
-
-```powershell
 pip install -r requirements.txt
-```
-
-安装 Playwright Chromium：
-
-```powershell
 playwright install chromium
 ```
 
-## 快速开始
+## Quick Start
 
-完整快速流程见 [QUICKSTART.md](./QUICKSTART.md)。
+See [QUICKSTART.md](./QUICKSTART.md) for the shortest path.
 
-最常用流程如下：
+General flow:
+
+```powershell
+python main.py login
+python main.py list
+python main.py download
+python main.py click-download
+```
+
+For SmartEdu full-book downloads:
 
 ```powershell
 python main.py login
 python main.py smartedu-grade
 ```
 
-第一次命令用于手动登录并保存 `auth.json`。第二个命令用于粘贴智慧教育平台整册导航页 URL，然后自动下载整册资源。
+## Commands
 
-## 命令
-
-### 登录
+### Save Login Session
 
 ```powershell
 python main.py login
 ```
 
-输入登录页 URL，在打开的浏览器中手动登录。登录完成后回到命令行按回车，工具会保存 `auth.json`。
+Enter a login page URL. Chromium opens in visible mode. Log in manually, then return to the terminal and press Enter. The session is saved to `auth.json`.
 
-### 查看普通网页链接和按钮
+### Inspect A Page
 
 ```powershell
 python main.py list
 ```
 
-用于观察登录后页面里的 `a` 标签、按钮、`role=button`、`onclick` 元素。不下载文件。
+Enter any authenticated page URL. The tool lists:
 
-### 下载普通链接
+- `a` tag text and `href`
+- `button` elements
+- `[role="button"]` elements
+- elements with `onclick`
+
+Use this first when you do not know how the page exposes its downloads.
+
+### Download Normal Links
 
 ```powershell
 python main.py download
 ```
 
-扫描疑似下载链接，列出结果，输入 `y` 后下载到 `downloads/`。
+The tool scans the page for likely downloadable links, prints candidates, asks for confirmation, then downloads them through Playwright’s authenticated request context.
 
-### 点击按钮下载
+Detection includes text or URL keywords:
+
+```text
+下载, download, 附件, file, export, 导出, 资料, downloadFile
+```
+
+And file extensions:
+
+```text
+.zip, .rar, .7z, .pdf, .doc, .docx, .xls, .xlsx,
+.ppt, .pptx, .csv, .txt, .exe, .msi
+```
+
+### Click Download Buttons
 
 ```powershell
 python main.py click-download
 ```
 
-查找“下载 / Download / 附件 / 导出 / Export / 资料”等按钮并尝试点击，用 Playwright 捕获下载事件。
+The tool searches for download/export-like buttons and tries to click them one by one. It uses `page.expect_download()` to capture browser download events. A failed button does not stop the whole run.
 
-### 智慧教育平台单课下载
+### SmartEdu Single Page Adapter
 
 ```powershell
 python main.py smartedu
 ```
 
-粘贴类似 `https://basic.smartedu.cn/syncClassroom/classActivity?...` 的课程页面 URL，工具会下载当前课程的四类 PDF 资源。
+Use this for a SmartEdu course activity page, for example:
 
-### 智慧教育平台整册下载
+```text
+https://basic.smartedu.cn/syncClassroom/classActivity?activityId=...
+```
+
+It downloads SmartEdu teaching resources such as courseware, teaching design, learning task sheets, and after-class exercises.
+
+### SmartEdu Full-Book Adapter
 
 ```powershell
 python main.py smartedu-grade
 ```
 
-粘贴类似 `https://basic.smartedu.cn/syncClassroom/prepare?defaultTag=...` 的整册导航页 URL，工具会：
+Use this for a SmartEdu full-book navigation page, for example:
 
-- 自动识别教材
-- 拉取教材目录树
-- 创建章节文件夹
-- 逐个解析课程包
-- 下载课件、教学设计、学习任务单、课后练习
+```text
+https://basic.smartedu.cn/syncClassroom/prepare?defaultTag=...
+```
 
-示例输出目录：
+It automatically:
+
+- Detects the textbook from `defaultTag`
+- Loads the textbook chapter tree
+- Creates nested folders by chapter
+- Resolves each lesson package
+- Downloads the available teaching PDFs
+
+Example output:
 
 ```text
 downloads/
@@ -130,83 +164,93 @@ downloads/
       1 四则运算/
       2 观察物体（二）/
       3 运算律/
-      4 小数的意义和性质/
       ...
 ```
 
-## 项目结构
+## Project Layout
 
 ```text
 .
-├─ main.py                         # 统一命令入口
-├─ save_login.py                   # 手动登录并保存 auth.json
-├─ list_links.py                   # 扫描页面链接和按钮
-├─ download_page.py                # 下载普通链接
-├─ click_download_buttons.py       # 尝试点击按钮下载
-├─ smartedu_xiaoyuan_download.py   # 智慧教育平台单课下载
-├─ smartedu_grade_download.py      # 智慧教育平台整册下载
-├─ utils.py                        # 公共函数
+├─ main.py                         # CLI entrypoint
+├─ save_login.py                   # Save browser login session
+├─ list_links.py                   # Inspect links and buttons
+├─ download_page.py                # Download regular links
+├─ click_download_buttons.py       # Capture button-triggered downloads
+├─ smartedu_xiaoyuan_download.py   # SmartEdu single-page adapter
+├─ smartedu_grade_download.py      # SmartEdu full-book adapter
+├─ utils.py                        # Shared helpers
 ├─ requirements.txt
 ├─ README.md
 └─ QUICKSTART.md
 ```
 
-## Git 忽略
+## Extending To More Sites
 
-`.gitignore` 已忽略：
+The generic commands work best when files are exposed as normal links or browser downloads. If a site hides files behind JSON APIs, add a dedicated adapter similar to:
+
+- `smartedu_xiaoyuan_download.py`
+- `smartedu_grade_download.py`
+
+Recommended adapter pattern:
+
+1. Parse the target page URL.
+2. Fetch the site’s resource JSON/API with `context.request`.
+3. Extract real file URLs.
+4. Build readable filenames.
+5. Save into a site-specific folder under `downloads/`.
+
+## Git Ignore
+
+The project ignores local secrets and generated files:
 
 ```text
 auth.json
 downloads/
+.venv/
 __pycache__/
 *.pyc
 xiaoyuandownload-resource/
 ```
 
-其中 `auth.json` 和 `downloads/` 不应上传仓库。
+Do not commit `auth.json` or downloaded resources.
 
-## 常见问题
+## FAQ
 
-### auth.json 失效怎么办？
+### Does this work on any website?
 
-重新运行：
+It can inspect and attempt downloads from any page your logged-in browser can access. Generic mode handles common links and browser downloads. Sites with custom APIs may need a small adapter.
+
+### What if auth.json expires?
+
+Run:
 
 ```powershell
 python main.py login
 ```
 
-手动登录后再次保存登录态。
+Then log in again and save a fresh session.
 
-### 下载到的是 HTML 怎么办？
+### What if the downloaded file is HTML?
 
-通常说明登录态失效、权限不足、接口需要额外 token，或网站返回了错误页。先重新登录，再重试下载。
+That usually means the URL returned an error page, login expired, access is missing, or the real file is generated by another API. Re-login, run `list`, or write a site adapter.
 
-### 找不到下载链接怎么办？
+### What if no links are found?
 
-普通网页先运行：
-
-```powershell
-python main.py list
-```
-
-智慧教育平台页面优先使用：
+Try:
 
 ```powershell
-python main.py smartedu
-python main.py smartedu-grade
+python main.py click-download
 ```
 
-### 为什么整册目录里有空文件夹？
+If the site uses background APIs, inspect browser network requests and add an adapter.
 
-脚本会按教材目录完整建文件夹。有些目录在平台资源索引里没有对应课程包，目录会保留但没有 PDF。
+### Why is auth.json sensitive?
 
-### 为什么不能上传 auth.json？
+It stores cookies and localStorage tokens. Someone with that file may be able to reuse your logged-in session.
 
-`auth.json` 保存了 cookie、localStorage token 等登录态数据。别人拿到后可能复用你的登录状态访问网站。
+## Credits
 
-## 来源说明
-
-智慧教育平台专项下载逻辑参考了“小源教材下载助手”的公开实现思路：读取课程详情 JSON，从资源 `ti_items` 中寻找 PDF 链接，并结合登录态访问下载地址。
+The SmartEdu adapter is inspired by the public implementation approach of 小源教材下载助手: resolve SmartEdu resource JSON, locate file entries, and download them with the active login session.
 
 - 小源页面：https://www.yuanstudy.com/pages/7/
-- 公开仓库：https://github.com/MaxXiaoChen/xiaoyuandownload-resource
+- Public repo：https://github.com/MaxXiaoChen/xiaoyuandownload-resource

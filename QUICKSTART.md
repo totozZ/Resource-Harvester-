@@ -1,8 +1,8 @@
 # Quickstart
 
-这个文档只写最快使用路径。项目名：`SmartEdu Resource Harvester`，中文名“智慧教育资源采集器”。
+This is the fastest path for using **Resource Harvester** as a local web resource downloader.
 
-## 1. 安装
+## 1. Install
 
 ```powershell
 cd C:\Users\95833\Desktop\1
@@ -12,74 +12,109 @@ pip install -r requirements.txt
 playwright install chromium
 ```
 
-如果你已经安装过依赖，可以跳过这一步。
-
-## 2. 登录一次
+## 2. Save A Login Session
 
 ```powershell
 python main.py login
 ```
 
-输入国家中小学智慧教育平台登录页或首页 URL：
+Paste the login page URL for the website you want to download from.
+
+Examples:
 
 ```text
 https://basic.smartedu.cn/
+https://example.com/login
 ```
 
-浏览器打开后手动登录。确认登录成功后，回到命令行按回车保存登录态。
+Chromium opens visibly. Log in manually. After the page shows you are logged in, return to the terminal and press Enter.
 
-保存成功后会生成：
+This creates:
 
 ```text
 auth.json
 ```
 
-不要上传或分享这个文件。
+Do not upload or share `auth.json`.
 
-## 3. 下载单课资源
+## 3. Inspect The Target Page
 
-适合这种页面：
+```powershell
+python main.py list
+```
+
+Paste the page URL that contains files, attachments, export buttons, or download actions.
+
+The tool prints:
+
+- Link text and URLs
+- Buttons
+- `role=button` elements
+- `onclick` elements
+
+Use this step to understand what the page exposes before downloading.
+
+## 4. Download Normal File Links
+
+```powershell
+python main.py download
+```
+
+Paste the same target page URL. Resource Harvester will list likely files first. Type:
+
+```text
+y
+```
+
+to download them into:
+
+```text
+downloads/
+```
+
+## 5. Try Button-Based Downloads
+
+If the page uses buttons like Download, Export, 附件, 下载, 导出:
+
+```powershell
+python main.py click-download
+```
+
+Paste the target page URL. The tool will try matching buttons and capture browser download events.
+
+## 6. SmartEdu One-Page Download
+
+For SmartEdu course activity pages:
 
 ```text
 https://basic.smartedu.cn/syncClassroom/classActivity?activityId=...
 ```
 
-运行：
+Run:
 
 ```powershell
 python main.py smartedu
 ```
 
-粘贴课程页面 URL，确认后自动下载：
+It downloads available courseware, teaching design, learning task sheets, and after-class exercises.
 
-- 课件
-- 教学设计
-- 学习任务单
-- 课后练习
+## 7. SmartEdu Full-Book Download
 
-输出目录：
-
-```text
-downloads/smartedu/
-```
-
-## 4. 下载整册资源
-
-适合这种页面：
+For SmartEdu textbook navigation pages:
 
 ```text
 https://basic.smartedu.cn/syncClassroom/prepare?defaultTag=...
 ```
 
-运行：
+Run:
 
 ```powershell
 python main.py smartedu-grade
 ```
 
-粘贴整册导航页 URL。脚本会自动识别教材并按章节建文件夹。
+It creates chapter folders and downloads all available teaching PDFs.
 
-示例目录：
+Example:
 
 ```text
 downloads/
@@ -91,63 +126,57 @@ downloads/
       ...
 ```
 
-## 5. 普通网页下载
-
-先观察页面：
+## Command Cheat Sheet
 
 ```powershell
-python main.py list
+python main.py login           # Save login session
+python main.py list            # Inspect links/buttons
+python main.py download        # Download likely file links
+python main.py click-download  # Try download/export buttons
+python main.py smartedu        # SmartEdu single course page
+python main.py smartedu-grade  # SmartEdu full textbook page
 ```
 
-下载普通链接：
+## Where Are Files Saved?
 
-```powershell
-python main.py download
-```
-
-尝试按钮下载：
-
-```powershell
-python main.py click-download
-```
-
-## 常用命令速查
-
-```powershell
-python main.py login
-python main.py smartedu
-python main.py smartedu-grade
-python main.py list
-python main.py download
-python main.py click-download
-```
-
-## 结果在哪里？
-
-所有下载文件都在：
+Generic downloads:
 
 ```text
 downloads/
 ```
 
-智慧教育平台资源通常在：
+SmartEdu downloads:
 
 ```text
 downloads/smartedu/
 ```
 
-## 出错时先试什么？
+## Troubleshooting
 
-1. 重新登录：
+If downloads fail, try this order:
+
+1. Re-login:
 
 ```powershell
 python main.py login
 ```
 
-2. 再重新下载：
+2. Inspect the page:
 
 ```powershell
-python main.py smartedu-grade
+python main.py list
 ```
 
-3. 如果仍然失败，把终端报错和目标页面 URL 发给维护者排查。不要发送 `auth.json`。
+3. Try normal links:
+
+```powershell
+python main.py download
+```
+
+4. Try buttons:
+
+```powershell
+python main.py click-download
+```
+
+If the site uses custom background APIs, add a site adapter or inspect the browser Network panel to find the real file endpoint.
